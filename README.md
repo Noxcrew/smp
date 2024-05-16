@@ -32,7 +32,10 @@ SMP can be found on Noxcrew's public Maven repository and added to a Gradle proj
 
 ```kotlin
 repositories {
-    mavenCentral()
+    maven {
+        name = "noxcrew"
+        url = uri("https://maven.noxcrew.com/public")
+    }
 }
 
 dependencies {
