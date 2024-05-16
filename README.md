@@ -1,4 +1,7 @@
 # SMP
+<img alt="GitHub License" src="https://img.shields.io/github/license/noxcrew/smp">
+<img alt="GitHub Actions Workflow Status" src="https://img.shields.io/github/actions/workflow/status/noxcrew/smp/build.yml">
+<img alt="GitHub Release" src="https://img.shields.io/github/v/release/noxcrew/smp">
 
 SMP (Simple Maths Parser) is a library that can solve relatively simple mathematical expressions in a textual format.
 It is written in Kotlin, and is a Kotlin-first library.
