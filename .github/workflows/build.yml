@@ -1,0 +1,55 @@
+name: Build
+
+on:
+  push:
+    branches: ["**"]
+    tags-ignore: ["**"]
+  pull_request:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: temurin
+
+      - name: Gradle Wrapper Validation
+        uses: gradle/wrapper-validation-action@v1
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Gradle Build
+        run: ./gradlew build
+
+      - name: Determine Status
+        run: |
+          if [ "$(./gradlew properties | awk '/^version:/ { print $2; }' | grep '\-SNAPSHOT')" ]; then
+            echo "STATUS=snapshot" >> $GITHUB_ENV
+          else
+            echo "STATUS=release" >> $GITHUB_ENV
+          fi
+
+      - name: Publish Snapshot
+        if: "${{ env.STATUS != 'release' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}"
+        run: ./gradlew publish
+        env:
+          NOXCREW_MAVEN_PUBLIC_USERNAME: ${{ secrets.NOXCREW_MAVEN_PUBLIC_USERNAME }}
+          NOXCREW_MAVEN_PUBLIC_PASSWORD: ${{ secrets.NOXCREW_MAVEN_PUBLIC_PASSWORD }}
+
+      - name: Publish Release
+        if: "${{ env.STATUS == 'release' && github.event_name == 'release' }}"
+        run: ./gradlew publish
+        env:
+          NOXCREW_MAVEN_PUBLIC_USERNAME: ${{ secrets.NOXCREW_MAVEN_PUBLIC_USERNAME }}
+          NOXCREW_MAVEN_PUBLIC_PASSWORD: ${{ secrets.NOXCREW_MAVEN_PUBLIC_PASSWORD }}
