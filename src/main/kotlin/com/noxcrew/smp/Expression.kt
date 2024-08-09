@@ -22,6 +22,24 @@ public class Expression internal constructor(
      */
     internal val rpnSortedTokens: List<Token>,
 ) {
+
+    /**
+     * Returns a set of the names of all variables in this expression.
+     *
+     * Note that if this expression has already been resolved, this set will be empty.
+     *
+     * @return the variable names
+     * @since 1.0
+     */
+    public fun getVariableNames(): Set<String> =
+        rpnSortedTokens.mapNotNullTo(mutableSetOf()) { token ->
+            if (token is Value.Variable) {
+                token.name
+            } else {
+                null
+            }
+        }
+
     /**
      * Resolves all variables in this expression, returning a new expression that can be
      * computed without exceptions.
