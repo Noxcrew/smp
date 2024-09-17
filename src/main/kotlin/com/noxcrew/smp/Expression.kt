@@ -22,7 +22,6 @@ public class Expression internal constructor(
      */
     internal val rpnSortedTokens: List<Token>,
 ) {
-
     /**
      * Returns a set of the names of all variables in this expression.
      *
