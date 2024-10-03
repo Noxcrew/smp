@@ -1,6 +1,7 @@
 package com.noxcrew.smp
 
 import com.noxcrew.smp.SMP.Companion.create
+import com.noxcrew.smp.provider.NoOpVariableValueProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -46,7 +47,7 @@ public interface SMP {
          * @since 1.0
          */
         public fun create(
-            variableValueProvider: VariableValueProvider = VariableValueProvider.NONE,
+            variableValueProvider: VariableValueProvider = NoOpVariableValueProvider,
             scopeFactory: () -> CoroutineScope = { CoroutineScope(Job() + Dispatchers.Default) },
         ): SMP {
             return Parser(variableValueProvider, scopeFactory)

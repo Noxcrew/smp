@@ -16,6 +16,14 @@ public fun interface VariableValueProvider {
          *
          * @since 1.0
          */
+        @Deprecated(
+            message = "Moved to an object",
+            replaceWith =
+                ReplaceWith(
+                    expression = "NoOpVariableValueProvider",
+                    imports = ["com.noxcrew.smp.provider.NoOpVariableValueProvider"],
+                ),
+        )
         public val NONE: VariableValueProvider =
             VariableValueProvider {
                 throw UnsupportedOperationException("Variables are not supported in this parser!")
