@@ -6,6 +6,7 @@ import com.noxcrew.smp.token.Operator
 import com.noxcrew.smp.token.Token
 import com.noxcrew.smp.token.Value
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -60,7 +61,10 @@ public class Expression internal constructor(
         // Create the deferred loads for all the variables.
         val deferredVariables =
             toResolve.map { variable ->
-                scope.async(start = CoroutineStart.LAZY) {
+                // Attempt to read the cached value first before creating a task.
+                smp.variableValueProvider.getCachedValue(variable.name)?.let { cached ->
+                    CompletableDeferred(variable.name to cached)
+                } ?: scope.async(start = CoroutineStart.LAZY) {
                     try {
                         variable.name to smp.variableValueProvider.getValue(variable.name)
                     } catch (exception: Exception) {
@@ -97,6 +101,44 @@ public class Expression internal constructor(
     }
 
     /**
+     * Resolves all variables in this expression using their cached values,
+     * returning a new expression that can be computed without exceptions.
+     *
+     * Any non-cached variables will be set to the given fallback value.
+     *
+     * @param fallback value to use for all non-cached variables
+     * @return a copy of this expression with all cached variables resolved
+     * @since 1.1
+     */
+    public fun resolveCacheOnly(fallback: Double = 0.0): Expression {
+        val toResolve = rpnSortedTokens.filterIsInstance<Value.Variable>()
+
+        // Check we have variables to resolve first.
+        if (toResolve.isEmpty()) {
+            return this
+        }
+
+        // Determine the values for each variable.
+        val variables =
+            toResolve.associate { variable ->
+                variable.name to (smp.variableValueProvider.getCachedValue(variable.name) ?: fallback)
+            }
+
+        // Now return a new expression!
+        return Expression(
+            smp = smp,
+            rpnSortedTokens =
+                rpnSortedTokens.map { token ->
+                    if (token is Value.Variable) {
+                        Value.Constant(variables.getValue(token.name))
+                    } else {
+                        token
+                    }
+                },
+        )
+    }
+
+    /**
      * Computes the result of this expression without resolving variables.
      *
      * This method will throw a [ComputeException] if there are any unresolved variables
@@ -121,6 +163,18 @@ public class Expression internal constructor(
      */
     public suspend fun compute(): Double {
         return resolve().internalCompute()
+    }
+
+    /**
+     * Computes the result of this expression, resolving variables beforehand,
+     * using only cached results.
+     *
+     * @param fallback value to use for all non-cached variables
+     * @return the result of the expression
+     * @since 1.1
+     */
+    public fun computeCacheOnly(fallback: Double = 0.0): Double {
+        return resolveCacheOnly(fallback).internalCompute()
     }
 
     /**

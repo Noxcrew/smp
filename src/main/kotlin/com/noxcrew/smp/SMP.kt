@@ -86,4 +86,17 @@ public interface SMP {
      * @since 1.0
      */
     public suspend fun compute(input: String): Double = parse(input).compute()
+
+    /**
+     * Shorthand method to parse the input and compute it using only cached variables.
+     *
+     * @param fallback value to use for all non-cached variables
+     * @return the result of the expression
+     * @see Expression.computeCacheOnly
+     * @since 1.1
+     */
+    public fun computeCacheOnly(
+        input: String,
+        fallback: Double = 0.0,
+    ): Double = parse(input).computeCacheOnly(fallback)
 }

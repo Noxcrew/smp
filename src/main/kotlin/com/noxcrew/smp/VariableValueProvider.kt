@@ -38,4 +38,13 @@ public fun interface VariableValueProvider {
      * @since 1.0
      */
     public suspend fun getValue(name: String): Double
+
+    /**
+     * Returns the cached value of this variable.
+     *
+     * @param name the name of the variable
+     * @return the value of the variable
+     * @since 1.1
+     */
+    public fun getCachedValue(name: String): Double? = null
 }
