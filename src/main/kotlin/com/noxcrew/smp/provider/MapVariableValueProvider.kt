@@ -15,7 +15,9 @@ import com.noxcrew.smp.VariableValueProvider
 public data class MapVariableValueProvider(
     public val backingMap: Map<String, Double>,
 ) : VariableValueProvider {
-    override suspend fun getValue(name: String): Double {
+    override suspend fun getValue(name: String): Double = getCachedValue(name)
+
+    override fun getCachedValue(name: String): Double {
         return backingMap.getValue(name)
     }
 }
